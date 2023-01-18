@@ -1,3 +1,7 @@
+# Large files that we do not want to upload by any means
+data/Raw
+data/Jpeg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
