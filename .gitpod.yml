@@ -1,0 +1,14 @@
+image: gitpod/workspace-full-vnc
+tasks:
+  - name: Setup
+    before: sudo apt-get update && sudo apt-get install ffmpeg libsm6 libxext6  -y
+    command: pip install -r requirements.txt
+
+  - name: "Download coco weights"
+    command: wget https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5
+# # Ports to expose on workspace startup
+# ports:
+#   - port: 3000
+#     onOpen: open-preview
+#     name: Website
+#     description: Website Preview
