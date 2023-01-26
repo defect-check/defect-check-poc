@@ -32,18 +32,18 @@ except Exception:
     install_reqs = []
 
 setup(
-    name='mask-rcnn-tf2',
+    name='mask-rcnn-defect-check',
     version='1.0',
-    url='https://github.com/ahmedfgad/Mask-RCNN-TF2',
-    author='Ahmed Fawzy Gad',
-    author_email='ahmed.f.gad@gmail.com',
+    url='https://github.com/defect-check/defect-check-poc',
+    author='Rowend Duke',
+    author_email='rowendduke36@gmail.com',
     license='MIT',
     description='Object Detecting using Mask R-CNN in TensorFlow 2.0',
     packages=["mrcnn"],
     install_requires=install_reqs,
     include_package_data=True,
     python_requires='>=3.4',
-    long_description="""This is a modified version of this project (https://github.com/matterport/Mask_RCNN) so that the Mask R-CNN model works on TensorFlow 2.0. """,
+    long_description="""This is a modified version of these projects (https://github.com/matterport/Mask_RCNN) and (https://github.com/ahmedfgad/Mask-RCNN-TF2) for use in the defect-check project. It has been tested on Python 3.8.""",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
@@ -61,6 +61,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     keywords="image instance region segmentation object detection Mask-RCNN Mask RCNN R-CNN TensorFlow 2.0 Keras",
 )
