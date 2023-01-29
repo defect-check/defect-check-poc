@@ -1939,7 +1939,7 @@ def data_generator(dataset, config, shuffle=True, augment=False, augmentation=No
 #  MaskRCNN Class
 ############################################################
 
-class MaskRCNNDirected():
+class MaskRCNN():
     """Encapsulates the Mask RCNN model functionality.
 
     The actual Keras model is in the keras_model property.
@@ -2864,7 +2864,7 @@ class MaskRCNNDirected():
             log(k, v)
         return outputs_np
 
-class MaskRCNNDirectedRPN():
+class MaskRCNNRPN():
     """Encapsulates the Mask RCNN model functionality.
 
     The actual Keras model is in the keras_model property.
