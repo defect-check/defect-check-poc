@@ -19,16 +19,16 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)
 
-from lib.config import CustomConfig
+from src.config import CustomConfig
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
 # Directory to save logs and model checkpoints
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
-from lib import config
-from lib.train_model import train_model
-from lib.detect_defects import detect_defects
+from src import config
+from src.train_model import train_model
+from src.detect_defects import detect_defects
 from mrcnn.model import MaskRCNN
 
 if __name__ == "__main__":
