@@ -1,36 +1,58 @@
+import os
+import json
+import numpy as np
+from skimage.io import imread
+from skimage.draw import polygon
+import random
 from mrcnn import utils
+from .line_to_poly import line_to_poly
 
 # The names of the classes used for this model
 CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
+REGION_ATTRIBUTE = "conductor"
 
 VIA_PROJECT_JSON = "via_region_data.json"
 
-
-def split_train_test_validation(dataset, ratio=[5, 1, 1]):
-    m = len(dataset)
+_seed = random.randint(0,500)
+def split_train_test_validate(dataset: list, ratio=(5, 1, 1)):
+    """
+    Splits a dataset into training, testing and validation sets.
+    dataset: The list of training items
+    ratio: A tuple of 3 items showing the ratio in which to split the items
+    """
+    dataset = dataset.copy()
+    random.Random(_seed).shuffle(dataset)
+    num_dataset = len(dataset)
     guide = []
     total = ratio[0] + ratio[1] + ratio[2]
-    ratio = [round(m * ratio[0] / total), round(m * ratio[1] / total), 0]
-    ratio[2] = m - ratio[0] - ratio[1]
-    for i in range(ratio):
-        for j in range(ratio[i]):
+    ratio = [round(num_dataset * ratio[0] / total),
+             round(num_dataset * ratio[1] / total), 0]
+    ratio[2] = num_dataset - ratio[0] - ratio[1]
+    for i in range(3):
+        for _ in range(ratio[i]):
             guide.append(i)
+
+    def collect(j):
+        return list(i[1] for i in filter(
+            lambda i: guide[i[0]] == j, enumerate(dataset)))
     return {
-        "train": filter(lambda i: guide[i[0]] == "train", enumerate(dataset)),
-        "test": filter(lambda i: guide[i[0]] == "test", enumerate(dataset)),
-        "val": filter(lambda i: guide[i[0]] == "val", enumerate(dataset)),
+        "train": collect(0),
+        "test": collect(1),
+        "val": collect(2),
     }
 
-
 class CustomDataset(utils.Dataset):
+    """
+    The CustomDataset class wraps utility methods for working with data.
+    """
     def load_custom(self, dataset_dir, subset):
         """Load a subset of the dataset.
         dataset_dir: Root directory of the dataset.
         subset: Subset to load: train or val
         """
         # Add classes (change name as needed).
-        for class_name in CLASS_NAME.keys():
-            self.add_class(class_name, CLASS_NAME[class_name], class_name)
+        for class_name, key in CLASS_NAME.items():
+            self.add_class(class_name, key, class_name)
 
         # Train or validation dataset?
         assert subset in ["train", "val"]
@@ -50,42 +72,42 @@ class CustomDataset(utils.Dataset):
         #   'size': 100202
         # }
         # We mostly care about the x and y coordinates of each region
-        annotations_dict = json.load(open(os.path.join(dataset_dir, VIA_PROJECT_JSON)))
-        annotations = list(annotations_dict.values())  # don't need the dict keys
+        annotations_dict = json.load(
+            open(os.path.join(dataset_dir, VIA_PROJECT_JSON), encoding="utf-8"))
+        # don't need the dict keys
+        annotations = list(annotations_dict.values())
 
-        annotations = split_train_test_validation(annotations)[subset]
+        annotations = split_train_test_validate(annotations)[subset]
         # The VIA tool saves images in the JSON even if they don't have any
         # annotations. Skip unannotated images.
         annotations = [a for a in annotations if a["regions"]]
 
         # Add images
-        for a in annotations:
-            # print(a)
-            # Get the x, y coordinates of points of the polygons that make up
+        for item in annotations:
+            # print(item)
+            # Get the x, y coordinates of points of the shapes that make up
             # the outline of each object instance. There are stores in the
             # shape_attributes (see json format above)
-            polygons = [r["shape_attributes"] for r in a["regions"]]
+            shapes = [r["shape_attributes"] for r in item["regions"]]
             class_names_each_region = [
-                r["region_attributes"]["type"]
-                if "type" in r["region_attributes"]
-                else r["region_attributes"]["category_id"]
-                for r in a["regions"]
+                r["region_attributes"][REGION_ATTRIBUTE]
+                for r in item["regions"]
             ]
 
-            # load_mask() needs the image size to convert polygons to masks.
+            # load_mask() needs the image size to convert shapes to masks.
             # Unfortunately, VIA doesn't include it in JSON, so we must read
             # the image. This is only managable since the dataset is tiny.
-            image_path = os.path.join(dataset_dir, a["filename"])
-            image = skimage.io.imread(image_path)
+            image_path = os.path.join(dataset_dir, item["filename"])
+            image = imread(image_path)
             height, width = image.shape[:2]
 
             self.add_image(
                 source=class_names_each_region,
-                image_id=a["filename"],  # use file name as a unique image id
+                image_id=item["filename"],  # use file name as a unique image id
                 path=image_path,
                 width=width,
                 height=height,
-                polygons=polygons,
+                shapes=shapes,
             )
 
     def load_mask(self, image_id):
@@ -95,20 +117,19 @@ class CustomDataset(utils.Dataset):
              one mask per instance.
          class_ids: a 1D array of class IDs of the instance masks.
         """
-        # If not a class1 dataset image, delegate to parent class.
-        image_info = self.image_info[image_id]
-        # if image_info["source"] != "damage":
-        #     return super(self.__class__, self).load_mask(image_id)
-
-        # Convert polygons to a bitmap mask of shape
+        
+        # Convert shapes to a bitmap mask of shape
         # [height, width, instance_count]
         info = self.image_info[image_id]
         mask = np.zeros(
-            [info["height"], info["width"], len(info["polygons"])], dtype=np.uint8
+            [info["height"], info["width"], len(info["shapes"])], dtype=np.uint8
         )
-        for i, p in enumerate(info["polygons"]):
+        for i, p in enumerate(info["shapes"]):
             # Get indexes of pixels inside the polygon and set them to 1
-            rr, cc = skimage.draw.polygon(p["all_points_y"], p["all_points_x"])
+            points =  p["all_points_y"], p["all_points_x"]
+            if p["name"] == "polyline":
+                points = line_to_poly(*points,4)
+            rr, cc = polygon(*points)
             mask[rr, cc, i] = 1
 
         # Return mask, and array of class IDs of each instance. Since we have

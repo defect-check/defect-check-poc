@@ -1,13 +1,16 @@
-def train_model(model, epochs):
+import imgaug
+from .dataset import CustomDataset
+
+def train_model(model, dataset,config, epochs):
     """Train the model."""
     # Training dataset.
     dataset_train = CustomDataset()
-    dataset_train.load_custom(args.dataset, "train")
+    dataset_train.load_custom(dataset, "train")
     dataset_train.prepare()
 
     # Validation dataset
     dataset_val = CustomDataset()
-    dataset_val.load_custom(args.dataset, "val")
+    dataset_val.load_custom(dataset, "val")
     dataset_val.prepare()
 
     # *** This training schedule is an example. Update to your needs ***
@@ -31,4 +34,3 @@ def train_model(model, epochs):
                 epochs=epochs,
                 layers='heads',
                 augmentation=None)
-

@@ -1,0 +1,5 @@
+{
+    "image":"mcr.microsoft.com/devcontainers/universal:2",
+    "onCreateCommand": "conda install python=3.8",
+    "updateContentCommand": "pip install -r requirements.txt"
+}

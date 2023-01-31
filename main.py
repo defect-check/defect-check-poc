@@ -8,28 +8,35 @@ Written by Waleed Abdulla
 Modified by Micheleen Harris (2020)
 Modified by Owologba Oro (2022)
 """
+# Disable formating so black does not mess up sys.path ordering
+# fmt: off
 import os
 import sys
-
 # Root directory of the project
 ROOT_DIR = os.path.abspath(".")
 
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)
-
+from mrcnn.utils import download_trained_weights
+from mrcnn.model import MaskRCNN
+from src.detect_defects import detect_defects
+from src.train_model import train_model
+from src import config
 from src.config import CustomConfig
+# fmt: on
+
+
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+
+# Path to dataset
+DATA_DIRECTORY = os.path.join(ROOT_DIR, "data")
 
 # Directory to save logs and model checkpoints
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
-from src import config
-from src.train_model import train_model
-from src.detect_defects import detect_defects
-from mrcnn.model import MaskRCNN
 
 if __name__ == "__main__":
     import argparse
@@ -61,7 +68,7 @@ if __name__ == "__main__":
     # Validate arguments
     if args.command == "detect":
         assert args.image or args.video,\
-               "Provide --image to apply detction on."
+            "Provide --image to apply detction on."
 
     print("Weights: ", args.weights)
     print("Logs: ", args.logs)
@@ -81,17 +88,17 @@ if __name__ == "__main__":
     # Create model
     if args.command == "train":
         model = MaskRCNN(mode="training", config=config,
-                                  model_dir=args.logs)
+                         model_dir=args.logs)
     else:
         model = MaskRCNN(mode="inference", config=config,
-                                  model_dir=args.logs)
+                         model_dir=args.logs)
 
     # Select weights file to load
     if args.weights.lower() == "coco":
         weights_path = COCO_WEIGHTS_PATH
         # Download weights file
         if not os.path.exists(weights_path):
-            utils.download_trained_weights(weights_path)
+            download_trained_weights(weights_path)
     elif args.weights.lower() == "last":
         # Find last trained weights
         weights_path = model.find_last()[1]
@@ -114,11 +121,9 @@ if __name__ == "__main__":
 
     # Train or run inference
     if args.command == "train":
-        train_model(model, args.epochs)
+        train_model(model, DATA_DIRECTORY, config, args.epochs)
     elif args.command == 'image':
         detect_defects(model, image_path=args.image)
     else:
-        print("'{}' is not recognized. "
-              "Use 'train', or 'detect'".format(args.command))
-
-
+        print(f"'{args.command}' is not recognized. "
+              "Use 'train', or 'detect'")
