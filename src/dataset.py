@@ -5,7 +5,7 @@ from skimage.io import imread
 from skimage.draw import polygon
 import random
 from mrcnn import utils
-from .line_to_poly import line_to_poly
+from .line_to_poly import clip_to_bounds, line_to_poly
 
 # The names of the classes used for this model
 CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
@@ -129,7 +129,7 @@ class CustomDataset(utils.Dataset):
             # Get indexes of pixels inside the polygon and set them to 1
             points =  p["all_points_y"], p["all_points_x"]
             if p["name"] == "polyline":
-                points = line_to_poly(*points,4)
+                points = clip_to_bounds(line_to_poly(*points,4),(info["width"],info["height"]))
             rr, cc = polygon(*points)
             mask[rr, cc, i] = 1
 

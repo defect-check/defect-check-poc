@@ -1,5 +1,5 @@
 import math
-
+import numpy as np
 DISABLE_INTERSECT = False
 def div(a, b):
     """
@@ -114,3 +114,7 @@ def line_to_poly(points_x, points_y, thickness):
         m1_y.append(point_3[1])
         m2_y.append(point_4[1])
     return m1_x+m2_x[-1::-1], m1_y+m2_y[-1::-1]
+
+def clip_to_bounds(points,bounds):
+    x,y = np.array(points[0]), np.array(points[1])
+    return np.clip(x,0,bounds[0]-1,x), np.clip(y,0,bounds[1]-1,y)
