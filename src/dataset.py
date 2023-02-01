@@ -10,6 +10,7 @@ from .line_to_poly import line_to_poly
 # The names of the classes used for this model
 CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
 REGION_ATTRIBUTE = "conductor"
+SUB_DIRECTORY = "Compressed"
 
 VIA_PROJECT_JSON = "via_region_data.json"
 
@@ -97,7 +98,7 @@ class CustomDataset(utils.Dataset):
             # load_mask() needs the image size to convert shapes to masks.
             # Unfortunately, VIA doesn't include it in JSON, so we must read
             # the image. This is only managable since the dataset is tiny.
-            image_path = os.path.join(dataset_dir, item["filename"])
+            image_path = os.path.join(dataset_dir, SUB_DIRECTORY, item["filename"])
             image = imread(image_path)
             height, width = image.shape[:2]
 
