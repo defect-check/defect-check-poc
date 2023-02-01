@@ -80,7 +80,7 @@ def line_to_poly(points_x, points_y, thickness):
         # The lw is then measured along this hypotenuse
         scale = math.hypot(1, normal)
         dx = half_th * div(1, scale)
-        dy = half_th * (div(normal, scale) if normal != scale else 1)
+        dy = half_th * (div(normal, scale) if abs(normal) != math.inf else math.copysign(1, normal))
         if (s_y[i-1] > s_y[i]):
             dx, dy = -dx, -dy
 
