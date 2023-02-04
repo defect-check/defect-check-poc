@@ -53,7 +53,7 @@ class CustomDataset(utils.Dataset):
         """
         # Add classes (change name as needed).
         for class_name, key in CLASS_NAME.items():
-            self.add_class(class_name, key, class_name)
+            self.add_class("custom", key, class_name)
 
         # Train or validation dataset?
         assert subset in ["train", "val"]
@@ -90,10 +90,10 @@ class CustomDataset(utils.Dataset):
             # the outline of each object instance. There are stores in the
             # shape_attributes (see json format above)
             shapes = [r["shape_attributes"] for r in item["regions"]]
-            class_names_each_region = tuple(
-                r["region_attributes"][REGION_ATTRIBUTE]
-                for r in item["regions"]
-            )
+            # class_names_each_region = tuple(
+            #     r["region_attributes"][REGION_ATTRIBUTE]
+            #     for r in item["regions"]
+            # )
 
             # load_mask() needs the image size to convert shapes to masks.
             # Unfortunately, VIA doesn't include it in JSON, so we must read
@@ -103,7 +103,7 @@ class CustomDataset(utils.Dataset):
             height, width = image.shape[:2]
 
             self.add_image(
-                source=class_names_each_region,
+                source="custom",
                 image_id=item["filename"],  # use file name as a unique image id
                 path=image_path,
                 width=width,
