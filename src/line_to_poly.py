@@ -50,13 +50,19 @@ def get_intersect(x1, y1, m1, x2, y2, m2):
     return x, y
 
 
+F30_RADIANS = 30 * math.pi / 180
+TAN_30 = math.tan(F30_RADIANS)
 def is_sharp_angle(m1, m2):
     """
     Checks whether the angle between two lines is too small
     to use their intersect
+    TODO validate these results
     """
-    angle = div((m1 - m2) , (1 + m1*m2))
-    return DISABLE_INTERSECT or angle>0 and angle< 0.577 # tan(30)
+    if abs(m1) == math.inf or abs(m2) == math.inf:
+        angle = abs(math.atan(m1) - math.atan(m2))
+        return angle < F30_RADIANS
+    angle = abs(div((m1 - m2) , (1 - m1*m2)))
+    return DISABLE_INTERSECT or angle < TAN_30
 
 
 def line_to_poly(points_x, points_y, thickness):
