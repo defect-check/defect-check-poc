@@ -90,9 +90,7 @@ class CustomDataset(utils.Dataset):
             # the outline of each object instance. There are stores in the
             # shape_attributes (see json format above)
             shapes = [r["shape_attributes"] for r in item["regions"]]
-            class_names_each_region = 
-                r["region_attributes"][REGION_ATTRIBUTE]
-                for r in item["regions"]
+            class_names_each_region = (r["region_attributes"][REGION_ATTRIBUTE] for r in item["regions"])
             
 
             # load_mask() needs the image size to convert shapes to masks.
