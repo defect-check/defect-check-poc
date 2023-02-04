@@ -3,7 +3,7 @@ import numpy as np
 DISABLE_INTERSECT = False
 def div(a, b):
     """
-    Handles division with infinity
+    Handles division by zero while doing infinity sanity checks
     a: dividend
     b: divisor
     """
@@ -55,7 +55,7 @@ def is_sharp_angle(m1, m2):
     Checks whether the angle between two lines is too small
     to use their intersect
     """
-    angle = (m1 - m2) / (1 + m1*m2)
+    angle = div((m1 - m2) , (1 + m1*m2))
     return DISABLE_INTERSECT or angle>0 and angle< 0.577 # tan(30)
 
 

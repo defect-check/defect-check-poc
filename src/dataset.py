@@ -136,7 +136,6 @@ class CustomDataset(utils.Dataset):
         # return mask.astype(np.bool), np.ones([mask.shape[-1]], dtype=np.int32)
         class_ids = []
         for cls_name in info["source"]:
-            print(CLASS_NAME, cls_name)
             class_ids.append(CLASS_NAME[cls_name])
         return mask.astype(np.bool), np.array(class_ids, dtype=np.int32)
 
