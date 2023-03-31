@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # Train or run inference
     if args.command == "train":
         train_model(model, DATA_DIRECTORY, config, args.epochs)
-    elif args.command == 'image':
+    elif args.command == 'detect':
         detect_defects(model, image_path=args.image)
     else:
         print(f"'{args.command}' is not recognized. "
