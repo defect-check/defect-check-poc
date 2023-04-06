@@ -1,9 +1,9 @@
 import imgaug
+import torch
 from .dataset import CustomDataset
 from .engine import train_one_epoch, evaluate
-import .utils
-import .transforms as T
-import torch
+from . import utils
+from . import transforms as T
 
 
 def get_transform(train):
