@@ -27,6 +27,8 @@ from src.run_model import run_model
 from src.train_model import train_model
 from src import config
 from src.config import CustomConfig
+
+DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 # fmt: on
 
 
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--logs",
         required=False,
-        default=config.DEFAULT_LOGS_DIR,
+        default=DEFAULT_LOGS_DIR,
         metavar="/path/to/logs/",
         help="Logs and checkpoints directory (default=logs/)",
     )

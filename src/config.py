@@ -35,4 +35,4 @@ class CustomConfig:
     # Path to dataset
     DATA_DIRECTORY = os.path.join(ROOT_DIR, "data")
     # Directory to save logs and model checkpoints
-    DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
+    LOGS_DIRECTORY = os.path.join(ROOT_DIR, "logs")
