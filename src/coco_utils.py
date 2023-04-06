@@ -4,7 +4,7 @@ import os
 import torch
 import torch.utils.data
 import torchvision
-import transforms as T
+from . import transforms as T
 from pycocotools import mask as coco_mask
 from pycocotools.coco import COCO
 
@@ -223,8 +223,14 @@ class CocoDetection(torchvision.datasets.CocoDetection):
 def get_coco(root, image_set, transforms, mode="instances"):
     anno_file_template = "{}_{}2017.json"
     PATHS = {
-        "train": ("train2017", os.path.join("annotations", anno_file_template.format(mode, "train"))),
-        "val": ("val2017", os.path.join("annotations", anno_file_template.format(mode, "val"))),
+        "train": (
+            "train2017",
+            os.path.join("annotations", anno_file_template.format(mode, "train")),
+        ),
+        "val": (
+            "val2017",
+            os.path.join("annotations", anno_file_template.format(mode, "val")),
+        ),
         # "train": ("val2017", os.path.join("annotations", anno_file_template.format(mode, "val")))
     }
 
