@@ -1,36 +1,66 @@
 import imgaug
 from .dataset import CustomDataset
+from .engine import train_one_epoch, evaluate
+import .utils
+import .transforms as T
+import torch
 
-def train_model(model, dataset,config, epochs):
+
+def get_transform(train):
+    transforms = []
+    # converts the image, a PIL image, into a PyTorch Tensor
+    transforms.append(T.ToTensor())
+    if train:
+        # during training, randomly flip the training images
+        # and ground-truth for data augmentation
+        transforms.append(T.RandomHorizontalFlip(0.5))
+    return T.Compose(transforms)
+
+
+def train_model(model, dataset, config, epochs):
     """Train the model."""
-    # Training dataset.
-    dataset_train = CustomDataset()
-    dataset_train.load_custom(dataset, "train")
-    dataset_train.prepare()
+    # use our dataset and defined transformations
+    dataset = CustomDataset(config, get_transform(train=True))
+    dataset_test = CustomDataset(config, get_transform(train=False))
 
-    # Validation dataset
-    dataset_val = CustomDataset()
-    dataset_val.load_custom(dataset, "val")
-    dataset_val.prepare()
+    # split the dataset in train and test set
+    torch.manual_seed(1)
+    indices = torch.randperm(len(dataset)).tolist()
+    dataset = torch.utils.data.Subset(dataset, indices[:-50])
+    dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
 
-    # *** This training schedule is an example. Update to your needs ***
-    # Since we're using a very small dataset, and starting from
-    # COCO trained weights, we don't need to train too long. Also,
-    # no need to train all layers, just the heads should do it.
-    augmentation = imgaug.augmenters.Sometimes(0.1, [
-                    imgaug.augmenters.Fliplr(0.5),
-                    imgaug.augmenters.GaussianBlur(sigma=(0.0, 0.5)),
-                    imgaug.augmenters.Affine(
-                        scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
-                        translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
-                        rotate=(-25, 25),
-                        shear=(-8, 8)
-                    )
-                ])
+    # define training and validation data loaders
+    data_loader = torch.utils.data.DataLoader(
+        dataset, batch_size=2, shuffle=True, num_workers=4, collate_fn=utils.collate_fn
+    )
 
-    print("Training network heads")
-    model.train(dataset_train, dataset_val,
-                learning_rate=config.LEARNING_RATE,
-                epochs=epochs,
-                layers='heads',
-                augmentation=None)
+    data_loader_test = torch.utils.data.DataLoader(
+        dataset_test,
+        batch_size=1,
+        shuffle=False,
+        num_workers=4,
+        collate_fn=utils.collate_fn,
+    )
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+    # move model to the right device
+    model.to(device)
+
+    # construct an optimizer
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+
+    # and a learning rate scheduler which decreases the learning rate by
+    # 10x every 3 epochs
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
+
+    # let's train it for 10 epochs
+    num_epochs = 10
+
+    for epoch in range(num_epochs):
+        # train for one epoch, printing every 10 iterations
+        train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
+        # update the learning rate
+        lr_scheduler.step()
+        # evaluate on the test dataset
+        evaluate(model, data_loader_test, device=device)

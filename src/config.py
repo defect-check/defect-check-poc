@@ -1,10 +1,14 @@
-from mrcnn.config import Config
 from .dataset import CLASS_NAME
+import os
 
-class CustomConfig(Config):
+ROOT_DIR = os.path.abspath(".")
+
+
+class CustomConfig:
     """Configuration for training on the toy  dataset.
     Derives from the base Config class and overrides some values.
     """
+
     # Give the configuration a recognizable name
     NAME = "defect-detect"
 
@@ -26,4 +30,9 @@ class CustomConfig(Config):
     IMAGE_MAX_DIM = 448
 
     # Learning rate
-    LEARNING_RATE=0.0001
+    LEARNING_RATE = 0.0001
+
+    # Path to dataset
+    DATA_DIRECTORY = os.path.join(ROOT_DIR, "data")
+    # Directory to save logs and model checkpoints
+    DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
