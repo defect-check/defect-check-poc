@@ -9,7 +9,7 @@ from . import transforms as T
 def get_transform(train):
     transforms = []
     # converts the image, a PIL image, into a PyTorch Tensor
-    transforms.append(T.ToTensor())
+    transforms.append(T.PILToTensor())
     if train:
         # during training, randomly flip the training images
         # and ground-truth for data augmentation
@@ -17,7 +17,7 @@ def get_transform(train):
     return T.Compose(transforms)
 
 
-def train_model(model, dataset, config, epochs):
+def train_model(model, config, epochs=40):
     """Train the model."""
     # use our dataset and defined transformations
     dataset = CustomDataset(config, get_transform(train=True))
@@ -54,10 +54,7 @@ def train_model(model, dataset, config, epochs):
     # 10x every 3 epochs
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
-    # let's train it for 10 epochs
-    num_epochs = 10
-
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
         # train for one epoch, printing every 10 iterations
         train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
         # update the learning rate
