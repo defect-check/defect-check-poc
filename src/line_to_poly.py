@@ -1,6 +1,9 @@
 import math
 import numpy as np
+
 DISABLE_INTERSECT = False
+
+
 def div(a, b):
     """
     Handles division with infinity
@@ -10,7 +13,7 @@ def div(a, b):
     if abs(a) == math.inf and abs(b) == math.inf:
         raise ValueError("Cannot divide infinity by infinity")
     try:
-        return a/b
+        return a / b
     except ZeroDivisionError:
         return math.copysign(math.inf, a)
 
@@ -40,13 +43,13 @@ def get_intersect(x1, y1, m1, x2, y2, m2):
     elif m2 == math.inf:
         x = x2
     else:
-        x = div(c1 - c2, (m2-m1))
+        x = div(c1 - c2, (m2 - m1))
     if m1 == math.inf:
         y = m2 * x + c2
     elif m2 == math.inf:
         y = m1 * x + c1
     else:
-        y = div((c1 * m2 - c2 * m1), (m2 - m1))    
+        y = div((c1 * m2 - c2 * m1), (m2 - m1))
     return x, y
 
 
@@ -55,8 +58,8 @@ def is_sharp_angle(m1, m2):
     Checks whether the angle between two lines is too small
     to use their intersect
     """
-    angle = (m1 - m2) / (1 + m1*m2)
-    return DISABLE_INTERSECT or angle>0 and angle< 0.577 # tan(30)
+    angle = (m1 - m2) / (1 + m1 * m2)
+    return DISABLE_INTERSECT or angle > 0 and angle < 0.577  # tan(30)
 
 
 def line_to_poly(points_x, points_y, thickness):
@@ -72,33 +75,36 @@ def line_to_poly(points_x, points_y, thickness):
     s_x = points_x
     s_y = points_y
     last_grad = 0
-    half_th = thickness/2
+    half_th = thickness / 2
     for i in range(1, len(points_x)):
         # The normal of the current line segment
-        normal = get_normal(s_x[i-1], s_y[i-1], s_x[i], s_y[i])
+        normal = get_normal(s_x[i - 1], s_y[i - 1], s_x[i], s_y[i])
         # Instead of using cosines, we use the hypotenuse of the normal and a unit displacement in the x direction
         # The lw is then measured along this hypotenuse
         scale = math.hypot(1, normal)
         dx = half_th * div(1, scale)
-        dy = half_th * (div(normal, scale) if abs(normal) != math.inf else math.copysign(1, normal))
-        if (s_y[i-1] > s_y[i]):
+        dy = half_th * (
+            div(normal, scale) if abs(normal) != math.inf else math.copysign(1, normal)
+        )
+        if s_y[i - 1] > s_y[i]:
             dx, dy = -dx, -dy
 
         # Expand line using normal to form a rectangle with 4 points
-        point_1 = s_x[i-1]+dx, s_y[i-1]-dy
-        point_2 = s_x[i-1]-dx, s_y[i-1]+dy
-        point_3 = s_x[i]+dx, s_y[i]-dy
-        point_4 = s_x[i]-dx, s_y[i]+dy
-        
+        point_1 = s_x[i - 1] + dx, s_y[i - 1] - dy
+        point_2 = s_x[i - 1] - dx, s_y[i - 1] + dy
+        point_3 = s_x[i] + dx, s_y[i] - dy
+        point_4 = s_x[i] - dx, s_y[i] + dy
 
         gradient = div(1, normal)
-        if i > 1 and not is_sharp_angle(gradient, last_grad):
+        if i > 1:  # and not is_sharp_angle(gradient, last_grad):
             # Smooth out the corners of each join by taking the intersect
             # For very sharp corners, this will cause artifacts
             intersect_1 = get_intersect(
-                m1_x[-1], m1_y[-1], last_grad, point_1[0], point_1[1], gradient)
+                m1_x[-1], m1_y[-1], last_grad, point_1[0], point_1[1], gradient
+            )
             intersect_2 = get_intersect(
-                m2_x[-1], m2_y[-1], last_grad, point_2[0], point_2[1], gradient)
+                m2_x[-1], m2_y[-1], last_grad, point_2[0], point_2[1], gradient
+            )
             m1_x[-1] = intersect_1[0]
             m2_x[-1] = intersect_2[0]
             m1_y[-1] = intersect_1[1]
@@ -113,8 +119,9 @@ def line_to_poly(points_x, points_y, thickness):
         m2_x.append(point_4[0])
         m1_y.append(point_3[1])
         m2_y.append(point_4[1])
-    return m1_x+m2_x[-1::-1], m1_y+m2_y[-1::-1]
+    return m1_x + m2_x[-1::-1], m1_y + m2_y[-1::-1]
 
-def clip_to_bounds(points,bounds):
-    x,y = np.array(points[0]), np.array(points[1])
-    return np.clip(x,0,bounds[0]-1,x), np.clip(y,0,bounds[1]-1,y)
+
+def clip_to_bounds(points, bounds):
+    x, y = np.array(points[0]), np.array(points[1])
+    return np.clip(x, 0, bounds[0] - 1, x), np.clip(y, 0, bounds[1] - 1, y)
