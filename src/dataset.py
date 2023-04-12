@@ -86,7 +86,7 @@ class CustomDataset(torch.utils.data.Dataset):
         mask = self.load_mask(height, width, idx)
         obj_ids = np.unique(mask)
         # 0 is the background, so remove it
-        obj_ids = obj_ids[obj_ids != 0]
+        obj_ids = obj_ids[np.where(obj_ids != 0)]
 
         # split the color-encoded mask into a set
         # of binary masks
@@ -128,7 +128,7 @@ class CustomDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
-    def load_mask(self, height:int, width:int, image_id: int):
+    def load_mask(self, height: int, width: int, image_id: int):
         """Generate instance masks for an image.
         Returns:
          masks: A bool array of shape [height, width, instance count] with
