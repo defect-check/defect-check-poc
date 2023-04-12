@@ -89,8 +89,7 @@ class CustomDataset(torch.utils.data.Dataset):
         obj_ids = obj_ids[obj_ids != 0]
 
         # split the color-encoded mask into a set
-        # of binary masks
-        print(f"mask: {mask.shape}, obj_ids: {mask.shape}")
+        # of binary masksf
         masks = mask == obj_ids[:, None, None]
         # get bounding box coordinates for each mask
         num_objs = len(obj_ids)
@@ -150,4 +149,5 @@ class CustomDataset(torch.utils.data.Dataset):
                 points = clip_to_bounds(line_to_poly(*points, 4), (width, height))
             rr, cc = polygon(*points)
             mask[rr, cc, i] = CLASS_NAME[shape["region_attributes"]["conductor"]]
+        print(f"mask shape: {mask.shape} ")
         return mask
