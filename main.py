@@ -46,6 +46,7 @@ def load_model(config, pretrained):
     model.roi_heads.mask_predictor = MaskRCNNPredictor(
         in_features_mask, hidden_layer, config.NUM_CLASSES
     )
+    return model
 
 
 if __name__ == "__main__":
