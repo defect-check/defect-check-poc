@@ -76,11 +76,12 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         # load images ad masks
-        img = Image.open(self.imgs[idx]["path"]).convert("RGB")
+        img = Image.open(self.imgs[idx]["path"])
+        img = img.convert("RGB")
         # note that we haven't converted the mask to RGB,
         # because each color corresponds to a different instance
         # with 0 being background
-        height, width = img.shape[:2]
+        height, width = img.size
 
         mask = self.load_mask(height, width, idx)
         obj_ids = np.unique(mask)
