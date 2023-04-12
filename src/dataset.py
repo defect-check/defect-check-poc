@@ -128,7 +128,7 @@ class CustomDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
-    def load_mask(self, height, width, image_id):
+    def load_mask(self, height:int, width:int, image_id: int):
         """Generate instance masks for an image.
         Returns:
          masks: A bool array of shape [height, width, instance count] with
@@ -138,7 +138,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Convert shapes to a bitmap mask of shape
         # [height, width, instance_count]
-        info = self.image_info[image_id]
+        info = self.imgs[image_id]
         mask = np.zeros([height, width, len(info["shapes"])], dtype=np.uint8)
         for i, shape in enumerate(info["shapes"]):
             p = shape["shape_attributes"]
