@@ -14,7 +14,7 @@ from .line_to_poly import clip_to_bounds, line_to_poly
 CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
 REGION_ATTRIBUTE = "conductor"
 SUB_DIRECTORY = "Compressed"
-PALETTE = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+PALETTE = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 VIA_PROJECT_JSON = "via_region_data.json"
 
 
