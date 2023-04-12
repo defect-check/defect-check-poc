@@ -61,7 +61,6 @@ if __name__ == "__main__":
         "--weights",
         metavar="/path/to/weights.h5",
         required=False,
-        default="coco",
         help="'coco', 'last', 'imagenet' or <Path to weights .h5 file>",
     )
     parser.add_argument(
