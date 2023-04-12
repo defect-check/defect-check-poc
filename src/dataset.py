@@ -86,7 +86,7 @@ class CustomDataset(torch.utils.data.Dataset):
         mask = self.load_mask(height, width, idx)
         obj_ids = np.unique(mask)
         # 0 is the background, so remove it
-        obj_ids = obj_ids[np.where(obj_ids != 0)]
+        obj_ids = obj_ids[obj_ids != 0]
 
         # split the color-encoded mask into a set
         # of binary masks
@@ -140,6 +140,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # [height, width, instance_count]
         info = self.imgs[image_id]
         mask = np.zeros([height, width, len(info["shapes"])], dtype=np.uint8)
+
         for i, shape in enumerate(info["shapes"]):
             p = shape["shape_attributes"]
             # Get indexes of pixels inside the polygon and set them to 1
