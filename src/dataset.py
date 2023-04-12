@@ -139,7 +139,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Convert shapes to a bitmap mask of shape
         # [height, width, instance_count]
         info = self.imgs[image_id]
-        mask = np.zeros([height, width], dtype=np.uint8)
+        mask = np.zeros([height, width], dtype=np.float)
 
         for i, shape in enumerate(info["shapes"]):
             p = shape["shape_attributes"]
