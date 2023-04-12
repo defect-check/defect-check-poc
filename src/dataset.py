@@ -90,7 +90,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # split the color-encoded mask into a set
         # of binary masks
-        print(f"mask: {type(mask)}, obj_ids: {type(obj_ids)}")
+        print(f"mask: {mask.shape}, obj_ids: {mask.shape}")
         masks = mask == obj_ids[:, None, None]
         # get bounding box coordinates for each mask
         num_objs = len(obj_ids)
