@@ -9,7 +9,7 @@ from . import transforms as T
 def get_transform(train):
     transforms = []
     # converts the image, a PIL image, into a PyTorch Tensor
-    transforms.append(T.PILToTensor())
+    transforms.append(T.ToTensor())
     if train:
         # during training, randomly flip the training images
         # and ground-truth for data augmentation
