@@ -14,7 +14,7 @@ from .line_to_poly import clip_to_bounds, line_to_poly
 CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
 REGION_ATTRIBUTE = "conductor"
 SUB_DIRECTORY = "Compressed"
-
+PALETTE = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 VIA_PROJECT_JSON = "via_region_data.json"
 
 
@@ -139,7 +139,7 @@ class CustomDataset(torch.utils.data.Dataset):
         # Convert shapes to a bitmap mask of shape
         # [height, width, instance_count]
         info = self.imgs[image_id]
-        mask = np.zeros([height, width, len(info["shapes"])], dtype=np.uint8)
+        mask = np.zeros([height, width], dtype=np.uint8)
 
         for i, shape in enumerate(info["shapes"]):
             p = shape["shape_attributes"]
@@ -148,6 +148,7 @@ class CustomDataset(torch.utils.data.Dataset):
             if p["name"] == "polyline":
                 points = clip_to_bounds(line_to_poly(*points, 4), (width, height))
             rr, cc = polygon(*points)
-            mask[rr, cc, i] = CLASS_NAME[shape["region_attributes"]["conductor"]]
+            mask[rr, cc] = PALETTE[i]
+            # CLASS_NAME[shape["region_attributes"]["conductor"]]
         print(f"mask shape: {mask.shape} ")
         return mask
