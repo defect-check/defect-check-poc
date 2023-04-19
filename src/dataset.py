@@ -150,6 +150,5 @@ class CustomDataset(torch.utils.data.Dataset):
             if p["name"] == "polyline":
                 points = clip_to_bounds(line_to_poly(*points, 4), (width, height))
             rr, cc = polygon(*points)
-            mask[rr, cc] = PALETTE[i]
-            # CLASS_NAME[shape["region_attributes"]["conductor"]]
+            mask[rr, cc] = PALETTE[CLASS_NAME[shape["region_attributes"]["conductor"]]]
         return mask
