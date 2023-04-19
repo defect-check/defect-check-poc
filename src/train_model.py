@@ -8,6 +8,8 @@ from .engine import train_one_epoch, evaluate
 from . import utils
 from . import transforms as T
 
+TEST_DATA_SIZE = 20
+
 
 def load_model(config, pretrained):
     model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained)
@@ -46,8 +48,8 @@ def train_model(model, config, epochs=40):
     # split the dataset in train and test set
     torch.manual_seed(1)
     indices = torch.randperm(len(dataset)).tolist()
-    dataset = torch.utils.data.Subset(dataset, indices[:-50])
-    dataset_test = torch.utils.data.Subset(dataset_test, indices[-50:])
+    dataset = torch.utils.data.Subset(dataset, indices[:-TEST_DATA_SIZE])
+    dataset_test = torch.utils.data.Subset(dataset_test, indices[-TEST_DATA_SIZE:])
 
     # define training and validation data loaders
     data_loader = torch.utils.data.DataLoader(
