@@ -10,7 +10,7 @@ from PIL import Image
 from .line_to_poly import clip_to_bounds, line_to_poly
 
 # The names of the classes used for this model
-CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
+CLASS_NAME = {"sagging conductor": 1, "good conductor": 2, "v": 2}
 REGION_ATTRIBUTE = "conductor"
 SUB_DIRECTORY = "Compressed"
 # Our palette is used to store the different types of objects in each image
