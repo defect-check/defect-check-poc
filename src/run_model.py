@@ -1,7 +1,6 @@
 import torch
 from PIL import Image
 from .train_model import load_model, get_transform
-from src.config import CustomConfig
 
 
 def run_model(model, image_path):
@@ -10,10 +9,7 @@ def run_model(model, image_path):
     It accepts an image path as input an returns the location of sagging conductors in
     the image if any.
     """
-    img = get_transform(False)(Image.open(image_path).convert("RGB"), {"boxes": []})
-    config = CustomConfig()
-
-    model = load_model(config, pretrained=True)
+    img, _ = get_transform(False)(Image.open(image_path).convert("RGB"), {"boxes": []})
     model = model.eval()
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     with torch.no_grad():
