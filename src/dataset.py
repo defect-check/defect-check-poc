@@ -1,7 +1,6 @@
 import os
 import json
 import numpy as np
-from skimage.io import imread
 from skimage.draw import polygon
 import random
 import torch
@@ -14,7 +13,10 @@ from .line_to_poly import clip_to_bounds, line_to_poly
 CLASS_NAME = {"sagging conductor": 1, "good conductor": 2}
 REGION_ATTRIBUTE = "conductor"
 SUB_DIRECTORY = "Compressed"
-PALETTE = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+# Our palette is used to store the different types of objects in each image
+# Each image in the training set must have at least one object or else there will be errors
+# This palette can handle 9 different objects (0 is background)
+PALETTE = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 VIA_PROJECT_JSON = "via_region_data.json"
 
 
@@ -150,5 +152,4 @@ class CustomDataset(torch.utils.data.Dataset):
             rr, cc = polygon(*points)
             mask[rr, cc] = PALETTE[i]
             # CLASS_NAME[shape["region_attributes"]["conductor"]]
-        print(f"mask shape: {mask.shape} ")
         return mask
