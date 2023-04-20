@@ -16,7 +16,6 @@ SUB_DIRECTORY = "Compressed"
 # Our palette is used to store the different types of objects in each image
 # Each image in the training set must have at least one object or else there will be errors
 # This palette can handle 9 different objects (0 is background)
-PALETTE = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 VIA_PROJECT_JSON = "via_region_data.json"
 
 
@@ -59,10 +58,6 @@ class CustomDataset(torch.utils.data.Dataset):
 
         # Add images
         for item in annotations:
-
-            # load_mask() needs the image size to convert shapes to masks.
-            # Unfortunately, VIA doesn't include it in JSON, so we must read
-            # the image. This is only managable since the dataset is tiny.
             image_path = os.path.join(
                 config.DATA_DIRECTORY, SUB_DIRECTORY, item["filename"]
             )
@@ -77,24 +72,27 @@ class CustomDataset(torch.utils.data.Dataset):
         self.imgs.append(kwargs)
 
     def __getitem__(self, idx):
-        # load images ad masks
+        # load images and masks
         img = Image.open(self.imgs[idx]["path"])
         img = img.convert("RGB")
+        height, width = img.size
+
         # note that we haven't converted the mask to RGB,
         # because each color corresponds to a different instance
         # with 0 being background
-        height, width = img.size
-
         mask = self.load_mask(height, width, idx)
         obj_ids = np.unique(mask)
         # 0 is the background, so remove it
         obj_ids = obj_ids[obj_ids != 0]
 
         # split the color-encoded mask into a set
-        # of binary masksf
+        # of binary masks for each class
         masks = mask == obj_ids[:, None, None]
+
         # get bounding box coordinates for each mask
         num_objs = len(obj_ids)
+
+        # Bounding boxes of each mask
         boxes = []
         for i in range(num_objs):
             pos = np.where(masks[i])
@@ -105,8 +103,9 @@ class CustomDataset(torch.utils.data.Dataset):
             boxes.append([xmin, ymin, xmax, ymax])
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        # there is only one class
-        labels = torch.ones((num_objs,), dtype=torch.int64)
+
+        # Labels of each mask
+        labels = torch.as_tensor(obj_ids, dtype=torch.int64)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
 
         image_id = torch.tensor([idx])
@@ -150,5 +149,5 @@ class CustomDataset(torch.utils.data.Dataset):
             if p["name"] == "polyline":
                 points = clip_to_bounds(line_to_poly(*points, 4), (width, height))
             rr, cc = polygon(*points)
-            mask[rr, cc] = PALETTE[CLASS_NAME[shape["region_attributes"]["conductor"]]]
+            mask[rr, cc] = CLASS_NAME[shape["region_attributes"]["conductor"]]
         return mask
