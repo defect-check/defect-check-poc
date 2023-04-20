@@ -12,6 +12,7 @@ Modified by Owologba Oro (2022)
 # fmt: off
 import os
 import sys
+import torch
 # Root directory of the project
 ROOT_DIR = os.path.abspath(".")
 
