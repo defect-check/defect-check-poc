@@ -4,9 +4,9 @@ import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from .dataset import CustomDataset
-from .engine import train_one_epoch, evaluate
-from . import utils
-from . import transforms as T
+from .torchvision.engine import train_one_epoch, evaluate
+from .torchvision import utils
+from .torchvision import transforms as T
 
 TEST_DATA_SIZE = 20
 
