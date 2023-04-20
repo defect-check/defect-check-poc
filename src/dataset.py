@@ -10,7 +10,13 @@ from PIL import Image
 from .line_to_poly import clip_to_bounds, line_to_poly
 
 # The names of the classes used for this model
-CLASS_NAME = {"sagging conductor": 1, "good conductor": 2, "v": 2}
+CLASS_NAME = {
+    "sagging conductor": 1,
+    "good conductor": 2,
+    "v": 2,
+    "sagging": 1,
+    "good": 2,
+}
 REGION_ATTRIBUTE = "conductor"
 SUB_DIRECTORY = "Compressed"
 # Our palette is used to store the different types of objects in each image
@@ -147,7 +153,7 @@ class CustomDataset(torch.utils.data.Dataset):
             # Get indexes of pixels inside the polygon and set them to 1
             points = p["all_points_y"], p["all_points_x"]
             if p["name"] == "polyline":
-                points = clip_to_bounds(line_to_poly(*points, 4), (width, height))
+                points = clip_to_bounds(line_to_poly(*points, 10), (width, height))
             rr, cc = polygon(*points)
             mask[rr, cc] = CLASS_NAME[shape["region_attributes"]["conductor"]]
         return mask
