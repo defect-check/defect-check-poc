@@ -12,6 +12,7 @@ from matplotlib.patches import Polygon
 import IPython.display
 from PIL import Image
 from .config import PALETTE
+from . import utils
 
 
 def compose_masks(target, data, use_scores=False, palette=PALETTE, cache={}):
