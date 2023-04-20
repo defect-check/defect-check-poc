@@ -3,6 +3,9 @@ import os
 
 ROOT_DIR = os.path.abspath(".")
 
+# Color used for visualization
+PALETTE = {1: (255, 0, 0), 2: (0, 255, 0), 3: (255, 255, 0)}
+
 
 class CustomConfig:
     """Configuration for training on the toy  dataset.

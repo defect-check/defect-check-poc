@@ -1,6 +1,5 @@
 from PIL import Image
-
-PALETTE = {1: (255, 0, 0), 2: (0, 255, 0), 3: (255, 255, 0)}
+from .config import PALETTE
 
 
 def compose_masks(target, data, use_scores=False, palette=PALETTE, cache={}):
@@ -14,6 +13,6 @@ def compose_masks(target, data, use_scores=False, palette=PALETTE, cache={}):
         )
 
         if label not in cache:
-            cache[label] = Image.new("RGB", target.size, PALETTE[label])
+            cache[label] = Image.new("RGB", target.size, PALETTE[int(label)])
         result = Image.composite(result, cache[label], mask)
     return result
