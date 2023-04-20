@@ -3,6 +3,7 @@ from .config import PALETTE
 
 
 def compose_masks(target, data, use_scores=False, palette=PALETTE, cache={}):
+    result = target
     for i in range(len(data["labels"])):
         score = data["scores"][i] if use_scores else 1
         label = data["labels"][i]
