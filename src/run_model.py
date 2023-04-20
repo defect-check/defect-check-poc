@@ -1,6 +1,7 @@
 import torch
 from PIL import Image
 from .train_model import load_model, get_transform
+from .visualize import compose_masks
 
 
 def run_model(model, image_path):
@@ -18,20 +19,4 @@ def run_model(model, image_path):
 
     target = Image.fromarray(img.mul(255).permute(1, 2, 0).byte().numpy(), "RGB")
 
-    red = Image.new("RGB", target.size, (255, 0, 0))
-    green = Image.new("RGB", target.size, (0, 255, 0))
-
-    for i in range(len(prediction[0]["labels"])):
-        mask = Image.fromarray(
-            255
-            - prediction[0]["masks"][i, 0]
-            .mul(255 * prediction[0]["scores"][i])
-            .byte()
-            .cpu()
-            .numpy(),
-            "L",
-        )
-        color = red if prediction[0]["labels"][i] == 1 else green
-        target = Image.composite(target, color, mask)
-
-    return target
+    return compose_masks(target, prediction, use_scores=True)

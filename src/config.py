@@ -32,6 +32,9 @@ class CustomConfig:
     # Learning rate
     LEARNING_RATE = 0.0001
 
+    # Number of workers used for training
+    NUM_WORKERS = 4
+
     # Path to dataset
     DATA_DIRECTORY = os.path.join(ROOT_DIR, "data")
     # Directory to save logs and model checkpoints
