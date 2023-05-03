@@ -1,7 +1,7 @@
 import torch
 from PIL import Image
 from .train_model import load_model, get_transform
-from .visualize import compose_masks
+from .visualize import compose_masks_predicted
 
 
 def run_model(model, image_path):
@@ -19,4 +19,4 @@ def run_model(model, image_path):
 
     target = Image.fromarray(img.mul(255).permute(1, 2, 0).byte().numpy(), "RGB")
 
-    return compose_masks(target, prediction, use_scores=True)
+    return compose_masks_predicted(target, prediction, use_scores=True)
