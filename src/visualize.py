@@ -60,7 +60,7 @@ Written by Waleed Abdulla
 
 
 def display_images(
-    images, titles=None, cols=4, cmap=None, norm=None, interpolation=None
+    images, titles=None, cols=4
 ):
     """Display the given set of images, optionally with titles.
     images: list or array of image tensors in HWC format.
@@ -78,9 +78,7 @@ def display_images(
         plt.subplot(rows, cols, i)
         plt.title(title, fontsize=9)
         plt.axis("off")
-        plt.imshow(
-            image.astype(np.uint8), cmap=cmap, norm=norm, interpolation=interpolation
-        )
+        plt.imshow(image)
         i += 1
     plt.show()
 
@@ -96,17 +94,6 @@ def random_colors(N, bright=True):
     colors = list(map(lambda c: colorsys.hsv_to_rgb(*c), hsv))
     random.shuffle(colors)
     return colors
-
-
-def apply_mask(image, mask, color, alpha=0.5):
-    """Apply the given mask to the image."""
-    for c in range(3):
-        image[:, :, c] = np.where(
-            mask == 1,
-            image[:, :, c] * (1 - alpha) + alpha * color[c] * 255,
-            image[:, :, c],
-        )
-    return image
 
 
 def display_instances(
@@ -290,76 +277,6 @@ def display_instances_RPN(
         plt.show()
 
 
-def display_differences(
-    image,
-    gt_box,
-    gt_class_id,
-    gt_mask,
-    pred_box,
-    pred_class_id,
-    pred_score,
-    pred_mask,
-    class_names,
-    title="",
-    ax=None,
-    show_mask=True,
-    show_box=True,
-    iou_threshold=0.5,
-    score_threshold=0.5,
-):
-    """Display ground truth and prediction instances on the same image."""
-    # Match predictions to ground truth
-    gt_match, pred_match, overlaps = utils.compute_matches(
-        gt_box,
-        gt_class_id,
-        gt_mask,
-        pred_box,
-        pred_class_id,
-        pred_score,
-        pred_mask,
-        iou_threshold=iou_threshold,
-        score_threshold=score_threshold,
-    )
-    # Ground truth = green. Predictions = red
-    colors = [(0, 1, 0, 0.8)] * len(gt_match) + [(1, 0, 0, 1)] * len(pred_match)
-    # Concatenate GT and predictions
-    class_ids = np.concatenate([gt_class_id, pred_class_id])
-    scores = np.concatenate([np.zeros([len(gt_match)]), pred_score])
-    boxes = np.concatenate([gt_box, pred_box])
-    masks = np.concatenate([gt_mask, pred_mask], axis=-1)
-    # Captions per instance show score/IoU
-    captions = ["" for m in gt_match] + [
-        "{:.2f} / {:.2f}".format(
-            pred_score[i],
-            (
-                overlaps[i, int(pred_match[i])]
-                if pred_match[i] > -1
-                else overlaps[i].max()
-            ),
-        )
-        for i in range(len(pred_match))
-    ]
-    # Set title if not provided
-    title = (
-        title or "Ground Truth and Detections\n GT=green, pred=red, captions: score/IoU"
-    )
-    # Display
-    display_instances(
-        image,
-        boxes,
-        masks,
-        class_ids,
-        class_names,
-        scores,
-        ax=ax,
-        show_bbox=show_box,
-        show_mask=show_mask,
-        colors=colors,
-        captions=captions,
-        title=title,
-    )
-
-
 # TODO: Replace with matplotlib equivalent?
 def draw_box(image, box, color):
     """Draw 3-pixel width bounding boxes on the given image array.
@@ -371,92 +288,6 @@ def draw_box(image, box, color):
     image[y1:y2, x1 : x1 + 2] = color
     image[y1:y2, x2 : x2 + 2] = color
     return image
-
-
-def display_top_masks(image, mask, class_ids, class_names, limit=4):
-    """Display the given image and the top few class masks."""
-    to_display = []
-    titles = []
-    to_display.append(image)
-    titles.append("H x W={}x{}".format(image.shape[0], image.shape[1]))
-    # Pick top prominent classes in this image
-    unique_class_ids = np.unique(class_ids)
-    mask_area = [
-        np.sum(mask[:, :, np.where(class_ids == i)[0]]) for i in unique_class_ids
-    ]
-    top_ids = [
-        v[0]
-        for v in sorted(
-            zip(unique_class_ids, mask_area), key=lambda r: r[1], reverse=True
-        )
-        if v[1] > 0
-    ]
-    # Generate images and titles
-    for i in range(limit):
-        class_id = top_ids[i] if i < len(top_ids) else -1
-        # Pull masks of instances belonging to the same class.
-        m = mask[:, :, np.where(class_ids == class_id)[0]]
-        m = np.sum(m * np.arange(1, m.shape[-1] + 1), -1)
-        to_display.append(m)
-        titles.append(class_names[class_id] if class_id != -1 else "-")
-    display_images(to_display, titles=titles, cols=limit + 1, cmap="Blues_r")
-
-
-def plot_overlaps(
-    gt_class_ids, pred_class_ids, pred_scores, overlaps, class_names, threshold=0.5
-):
-    """Draw a grid showing how ground truth objects are classified.
-    gt_class_ids: [N] int. Ground truth class IDs
-    pred_class_id: [N] int. Predicted class IDs
-    pred_scores: [N] float. The probability scores of predicted classes
-    overlaps: [pred_boxes, gt_boxes] IoU overlaps of predictions and GT boxes.
-    class_names: list of all class names in the dataset
-    threshold: Float. The prediction probability required to predict a class
-    """
-    gt_class_ids = gt_class_ids[gt_class_ids != 0]
-    pred_class_ids = pred_class_ids[pred_class_ids != 0]
-
-    plt.figure(figsize=(12, 10))
-    plt.imshow(overlaps, interpolation="nearest", cmap=plt.cm.Blues)
-    plt.yticks(
-        np.arange(len(pred_class_ids)),
-        [
-            "{} ({:.2f})".format(class_names[int(id)], pred_scores[i])
-            for i, id in enumerate(pred_class_ids)
-        ],
-    )
-    plt.xticks(
-        np.arange(len(gt_class_ids)),
-        [class_names[int(id)] for id in gt_class_ids],
-        rotation=90,
-    )
-
-    thresh = overlaps.max() / 2.0
-    for i, j in itertools.product(range(overlaps.shape[0]), range(overlaps.shape[1])):
-        text = ""
-        if overlaps[i, j] > threshold:
-            text = "match" if gt_class_ids[j] == pred_class_ids[i] else "wrong"
-        color = (
-            "white"
-            if overlaps[i, j] > thresh
-            else "black"
-            if overlaps[i, j] > 0
-            else "grey"
-        )
-        plt.text(
-            j,
-            i,
-            "{:.3f}\n{}".format(overlaps[i, j], text),
-            horizontalalignment="center",
-            verticalalignment="center",
-            fontsize=9,
-            color=color,
-        )
-
-    plt.tight_layout()
-    plt.xlabel("Ground Truth")
-    plt.ylabel("Predictions")
-
 
 def draw_boxes(
     image,
@@ -585,47 +416,3 @@ def draw_boxes(
                 p = Polygon(verts, facecolor="none", edgecolor=color)
                 ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
-
-
-def display_table(table):
-    """Display values in a table format.
-    table: an iterable of rows, and each row is an iterable of values.
-    """
-    html = ""
-    for row in table:
-        row_html = ""
-        for col in row:
-            row_html += "<td>{:40}</td>".format(str(col))
-        html += "<tr>" + row_html + "</tr>"
-    html = "<table>" + html + "</table>"
-    IPython.display.display(IPython.display.HTML(html))
-
-
-def display_weight_stats(model):
-    """Scans all the weights in the model and returns a list of tuples
-    that contain stats about each weight.
-    """
-    layers = model.get_trainable_layers()
-    table = [["WEIGHT NAME", "SHAPE", "MIN", "MAX", "STD"]]
-    for l in layers:
-        weight_values = l.get_weights()  # list of Numpy arrays
-        weight_tensors = l.weights  # list of TF tensors
-        for i, w in enumerate(weight_values):
-            weight_name = weight_tensors[i].name
-            # Detect problematic layers. Exclude biases of conv layers.
-            alert = ""
-            if w.min() == w.max() and not (l.__class__.__name__ == "Conv2D" and i == 1):
-                alert += "<span style='color:red'>*** dead?</span>"
-            if np.abs(w.min()) > 1000 or np.abs(w.max()) > 1000:
-                alert += "<span style='color:red'>*** Overflow?</span>"
-            # Add row
-            table.append(
-                [
-                    weight_name + alert,
-                    str(w.shape),
-                    "{:+9.4f}".format(w.min()),
-                    "{:+10.4f}".format(w.max()),
-                    "{:+9.4f}".format(w.std()),
-                ]
-            )
-    display_table(table)
