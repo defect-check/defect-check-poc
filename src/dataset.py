@@ -13,7 +13,7 @@ from .line_to_poly import clip_to_bounds, line_to_poly
 CLASS_NAME = {
     "sagging conductor": 1,
     "good conductor": 2,
-    "v": 2,
+    "v": 2, # Old error in annotation. Should be safe to remove.
     "sagging": 1,
     "good": 2,
 }
